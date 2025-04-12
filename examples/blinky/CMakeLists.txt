@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 
 set(STM32_CUBE_F4_PATH /Users/danimihalca/STM32Cube/Repository/STM32Cube_FW_F4_V1.27.1)
+set(STM32_CUBE_H5_PATH /Users/danimihalca/work/STM32CubeH5)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
 # Configure here which STM32 target(s) to build
-option(BLINKY_F4_EXAMPLE "Compile F4 example" ON)
+# option(BLINKY_F4_EXAMPLE "Compile F4 example" ON)
+option(BLINKY_F4_EXAMPLE "Compile F4 example" OFF)
 option(BLINKY_F1_EXAMPLE "Compile F1 example" OFF)
 option(BLINKY_L0_EXAMPLE "Compile L0 example" OFF)
+option(BLINKY_H5_EXAMPLE "Compile H5 example" ON)
 
 option(USE_CPP_FILE "Use the .cpp example file instead of the .c one" OFF)
 
@@ -37,6 +40,11 @@ endif()
 if(BLINKY_L0_EXAMPLE)
     list(APPEND CMSIS_COMP_LIST STM32L0)
     list(APPEND HAL_COMP_LIST STM32L0)
+endif()
+
+if(BLINKY_H5_EXAMPLE)
+    list(APPEND CMSIS_COMP_LIST STM32H5)
+    list(APPEND HAL_COMP_LIST STM32H5)
 endif()
 
 find_package(CMSIS COMPONENTS "${CMSIS_COMP_LIST}" REQUIRED)
@@ -88,4 +96,17 @@ if(BLINKY_L0_EXAMPLE)
         STM32::NoSys
     )
     stm32_print_size_of_target(stm32-blinky-l0)
+endif()
+
+# STM32H563
+if(BLINKY_H5_EXAMPLE)
+    add_executable(stm32-blinky-h5 ${MAIN_SOURCE_FILE} stm32h5xx_hal_conf.h)
+    target_link_libraries(stm32-blinky-h5
+        HAL::STM32::H5::RCC
+        HAL::STM32::H5::GPIO
+        HAL::STM32::H5::CORTEX
+        CMSIS::STM32::H563ZI
+        STM32::NoSys
+    )
+    stm32_print_size_of_target(stm32-blinky-h5)
 endif()
