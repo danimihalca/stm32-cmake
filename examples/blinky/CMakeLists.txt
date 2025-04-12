@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
+
+set(STM32_CUBE_F4_PATH /Users/danimihalca/STM32Cube/Repository/STM32Cube_FW_F4_V1.27.1)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
 # Configure here which STM32 target(s) to build
@@ -56,7 +58,7 @@ if(BLINKY_F4_EXAMPLE)
         HAL::STM32::F4::RCC
         HAL::STM32::F4::GPIO
         HAL::STM32::F4::CORTEX
-        CMSIS::STM32::F407VG
+        CMSIS::STM32::F469NI
         STM32::NoSys
     )
     stm32_print_size_of_target(stm32-blinky-f4)

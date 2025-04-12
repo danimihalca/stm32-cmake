@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 set(PROJ_NAME stm32-freertos)
 set(STM32_CMAKE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+set(STM32_CUBE_F4_PATH /Users/danimihalca/STM32Cube/Repository/STM32Cube_FW_F4_V1.27.1)
 
 # Please note: When using CMSIS, it is recommended to use the FreeRTOS version supplied in the
 # Cube repository because more recent kernels might be incompatible to the CMSIS
@@ -33,13 +34,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 # Can be used to print out all devices for the H7 or/and the F4 family
 # stm32_print_devices_by_family(FAMILY H7)
 # stm32_print_devices_by_family(FAMILY F4)
-set(SUPPORTED_BOARDS F100RB F407VG H743ZI L552ZE)
+set(SUPPORTED_BOARDS F100RB F469NI H743ZI L552ZE)
 option(FREERTOS_F100RB_EXAMPLE "Compile FreeRTOS example for the F100RB board" OFF)
-option(FREERTOS_F407VG_EXAMPLE "Compile FreeRTOS example for the F407VG board" OFF)
+option(FREERTOS_F469NI_EXAMPLE "Compile FreeRTOS example for the F469NI board" ON)
 option(FREERTOS_H743ZI_EXAMPLE "Compile FreeRTOS example for the H743ZI board" OFF)
 option(FREERTOS_L552ZE_EXAMPLE "Compile FreeRTOS example for the L552ZE board" OFF)
 
-if(NOT FREERTOS_F100RB_EXAMPLE AND NOT FREERTOS_F407VG_EXAMPLE AND NOT FREERTOS_H743ZI_EXAMPLE AND NOT FREERTOS_L552ZE_EXAMPLE)
+if(NOT FREERTOS_F100RB_EXAMPLE AND NOT FREERTOS_F469NI_EXAMPLE AND NOT FREERTOS_H743ZI_EXAMPLE AND NOT FREERTOS_L552ZE_EXAMPLE)
     message(FATAL_ERROR
         "Please select at least one target to compile by passing FREERTOS_<BOARD>_EXAMPLE=ON\n"
         "Supported boards: ${SUPPORTED_BOARDS}"
@@ -87,9 +88,9 @@ if(FREERTOS_H743ZI_EXAMPLE)
     endif()
 endif()
 
-if(FREERTOS_F407VG_EXAMPLE)
-    list(APPEND CMSIS_COMP_LIST STM32F407VG)
-    list(APPEND HAL_COMP_LIST STM32F407VG)
+if(FREERTOS_F469NI_EXAMPLE)
+    list(APPEND CMSIS_COMP_LIST STM32F469NI)
+    list(APPEND HAL_COMP_LIST STM32F469NI)
     list(APPEND FREERTOS_COMP_LIST ARM_CM4F)
 
     if(USE_CUBE_FREERTOS)
@@ -203,8 +204,8 @@ if(FREERTOS_H743ZI_EXAMPLE)
     stm32_generate_hex_file(${TARGET_NAME})
 endif()
 
-if(FREERTOS_F407VG_EXAMPLE)
-    set(TARGET_NAME ${PROJ_NAME}-f407vg)
+if(FREERTOS_F469NI_EXAMPLE)
+    set(TARGET_NAME ${PROJ_NAME}-f469ni)
     add_executable(${TARGET_NAME})
 
     target_sources(${TARGET_NAME} PRIVATE ${PROJECT_SOURCES})
@@ -216,7 +217,7 @@ if(FREERTOS_F407VG_EXAMPLE)
         HAL::STM32::F4::RCC
         HAL::STM32::F4::GPIO
         HAL::STM32::F4::CORTEX
-        CMSIS::STM32::F407VG
+        CMSIS::STM32::F469NI
         STM32::NoSys
     )
 

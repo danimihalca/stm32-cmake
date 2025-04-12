@@ -23,9 +23,9 @@
     #include <stm32f4xx_hal.h>
 
     // STM32F4-Discovery green led - PD12
-    #define LED_PORT                GPIOD
-    #define LED_PIN                 GPIO_PIN_12
-    #define LED_PORT_CLK_ENABLE     __HAL_RCC_GPIOD_CLK_ENABLE
+    #define LED_PORT                GPIOG
+    #define LED_PIN                 GPIO_PIN_6
+    #define LED_PORT_CLK_ENABLE     __HAL_RCC_GPIOG_CLK_ENABLE
 #elif defined STM32L5
     #include <stm32l5xx_hal.h>
 
