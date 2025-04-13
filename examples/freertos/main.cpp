@@ -33,6 +33,13 @@
     #define LED_PORT                GPIOB
     #define LED_PIN                 GPIO_PIN_7
     #define LED_PORT_CLK_ENABLE     __HAL_RCC_GPIOB_CLK_ENABLE
+#elif defined STM32H5
+    #include <stm32h5xx_hal.h>
+
+    // STM32H5
+    #define LED_PORT                GPIOB
+    #define LED_PIN                 GPIO_PIN_0
+    #define LED_PORT_CLK_ENABLE     __HAL_RCC_GPIOB_CLK_ENABLE
 #endif
 
 static void blinky::blinkTask(void *arg)

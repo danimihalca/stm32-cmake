@@ -1,14 +1,19 @@
 cmake_minimum_required(VERSION 3.16)
 set(PROJ_NAME stm32-freertos)
+
+set(FREERTOS_PATH /Users/danimihalca/work/en.x-cube-freertos-v1-3-0/Middlewares/Third_Party/FreeRTOS)
 set(STM32_CMAKE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 set(STM32_CUBE_F4_PATH /Users/danimihalca/STM32Cube/Repository/STM32Cube_FW_F4_V1.27.1)
+set(STM32_CUBE_H5_PATH /Users/danimihalca/work/STM32CubeH5)
+
+# For flashing: pyocd flash stm32-freertos-h563zi.elf
 
 # Please note: When using CMSIS, it is recommended to use the FreeRTOS version supplied in the
 # Cube repository because more recent kernels might be incompatible to the CMSIS
 # implementation provided by STM
 option(USE_CMSIS_RTOS "Use CMSIS RTOS provided by Cube repository" OFF)
 option(USE_CMSIS_RTOS_V2 "Use CMSIS RTOS_V2 provided by Cube repository" OFF)
-option(USE_CUBE_FREERTOS "Use the FreeRTOS kernel provided by the Cube repository" ON)
+option(USE_CUBE_FREERTOS "Use the FreeRTOS kernel provided by the Cube repository" OFF)
 
 if(USE_CUBE_FREERTOS)
     message(STATUS "Using FreeRTOS provided by Cube repository")
@@ -36,11 +41,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 # stm32_print_devices_by_family(FAMILY F4)
 set(SUPPORTED_BOARDS F100RB F469NI H743ZI L552ZE)
 option(FREERTOS_F100RB_EXAMPLE "Compile FreeRTOS example for the F100RB board" OFF)
-option(FREERTOS_F469NI_EXAMPLE "Compile FreeRTOS example for the F469NI board" ON)
+option(FREERTOS_F469NI_EXAMPLE "Compile FreeRTOS example for the F469NI board" OFF)
 option(FREERTOS_H743ZI_EXAMPLE "Compile FreeRTOS example for the H743ZI board" OFF)
 option(FREERTOS_L552ZE_EXAMPLE "Compile FreeRTOS example for the L552ZE board" OFF)
+option(FREERTOS_H563ZI_EXAMPLE "Compile FreeRTOS example for the H563ZI board" ON)
 
-if(NOT FREERTOS_F100RB_EXAMPLE AND NOT FREERTOS_F469NI_EXAMPLE AND NOT FREERTOS_H743ZI_EXAMPLE AND NOT FREERTOS_L552ZE_EXAMPLE)
+if(NOT FREERTOS_F100RB_EXAMPLE AND NOT FREERTOS_F469NI_EXAMPLE AND NOT FREERTOS_H743ZI_EXAMPLE AND NOT FREERTOS_L552ZE_EXAMPLE AND NOT FREERTOS_H563ZI_EXAMPLE)
     message(FATAL_ERROR
         "Please select at least one target to compile by passing FREERTOS_<BOARD>_EXAMPLE=ON\n"
         "Supported boards: ${SUPPORTED_BOARDS}"
@@ -99,6 +105,20 @@ if(FREERTOS_F469NI_EXAMPLE)
         set(FREERTOS_F4_NAMESPACE ${FREERTOS_NAMESPACE}::STM32::F4)
     else()
         set(FREERTOS_F4_NAMESPACE ${FREERTOS_NAMESPACE})
+    endif()
+endif()
+
+if(FREERTOS_H563ZI_EXAMPLE)
+    list(APPEND CMSIS_COMP_LIST STM32H563ZI)
+    list(APPEND HAL_COMP_LIST STM32H563ZI)
+    list(APPEND FREERTOS_COMP_LIST ARM_CM33_NTZ)
+
+    if(USE_CUBE_FREERTOS)
+        # The device family needs to be supplied as a component to use the Cube FreeRTOS sources
+        list(APPEND FREERTOS_COMP_LIST STM32H5)
+        set(FREERTOS_H5_NAMESPACE ${FREERTOS_NAMESPACE}::STM32::H5::M33)
+    else()
+        set(FREERTOS_H5_NAMESPACE ${FREERTOS_NAMESPACE})
     endif()
 endif()
 
@@ -234,6 +254,44 @@ if(FREERTOS_F469NI_EXAMPLE)
         target_compile_definitions(${TARGET_NAME} PRIVATE
             USE_CMSIS_RTOS_V2
             CMSIS_RTOS_V2_DEVICE_HEADER="stm32f4xx_hal.h"
+        )
+    endif()
+
+    stm32_print_size_of_target(${TARGET_NAME})
+    stm32_generate_binary_file(${TARGET_NAME})
+    stm32_generate_hex_file(${TARGET_NAME})
+endif()
+
+if(FREERTOS_H563ZI_EXAMPLE)
+    set(TARGET_NAME ${PROJ_NAME}-h563zi)
+    add_executable(${TARGET_NAME})
+
+    target_sources(${TARGET_NAME} PRIVATE ${PROJECT_SOURCES})
+    target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIRS})
+    target_link_libraries(${TARGET_NAME} PRIVATE
+        ${FREERTOS_H5_NAMESPACE}::Timers
+        ${FREERTOS_H5_NAMESPACE}::Heap::1
+        ${FREERTOS_H5_NAMESPACE}::ARM_CM33_NTZ
+        HAL::STM32::H5::RCC
+        HAL::STM32::H5::GPIO
+        HAL::STM32::H5::CORTEX
+        CMSIS::STM32::H563ZI
+        STM32::NoSys
+    )
+
+    if(USE_CMSIS_RTOS)
+        target_link_libraries(${TARGET_NAME} PRIVATE
+            CMSIS::STM32::H5::RTOS
+        )
+    endif()
+
+    if(USE_CMSIS_RTOS_V2)
+        target_link_libraries(${TARGET_NAME} PRIVATE
+            CMSIS::STM32::H5::RTOS_V2
+        )
+        target_compile_definitions(${TARGET_NAME} PRIVATE
+            USE_CMSIS_RTOS_V2
+            CMSIS_RTOS_V2_DEVICE_HEADER="stm32h5xx_hal.h"
         )
     endif()
 

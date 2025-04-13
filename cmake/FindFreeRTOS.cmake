@@ -31,6 +31,11 @@ if(STM32H7 IN_LIST FreeRTOS_FIND_COMPONENTS)
     list(APPEND FreeRTOS_FIND_COMPONENTS STM32H7_M7 STM32H7_M4)
 endif()
 
+if(STM32H5 IN_LIST FreeRTOS_FIND_COMPONENTS)
+    list(REMOVE_ITEM FreeRTOS_FIND_COMPONENTS STM32H5)
+    list(APPEND FreeRTOS_FIND_COMPONENTS STM32H5_M33)
+endif()
+
 if(STM32WB IN_LIST BSP_FIND_COMPONENTS)
     list(REMOVE_ITEM FreeRTOS_FIND_COMPONENTS STM32WB)
     list(APPEND FreeRTOS_FIND_COMPONENTS STM32WB_M4)
@@ -44,7 +49,7 @@ endif()
 # This section fills the family and ports components list
 foreach(COMP ${FreeRTOS_FIND_COMPONENTS})
     string(TOUPPER ${COMP} COMP)
-    string(REGEX MATCH "^STM32([CFGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" FAMILY_COMP ${COMP})
+    string(REGEX MATCH "^STM32([CFGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M33|M4|M7)?.*$" FAMILY_COMP ${COMP})
     # Valid family component, so add it (e.g. STM32H7)
     if(CMAKE_MATCH_1)
         list(APPEND FreeRTOS_FIND_COMPONENTS_FAMILIES ${FAMILY_COMP})
@@ -113,6 +118,7 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     endif()
 
     if(NOT (TARGET ${FreeRTOS_NAMESPACE}::Timers))
+        message("TIMER NOT DEFINED, CREATING", ${FreeRTOS_NAMESPACE}::Timers)
         add_library(${FreeRTOS_NAMESPACE}::Timers INTERFACE IMPORTED)
         target_sources(${FreeRTOS_NAMESPACE}::Timers INTERFACE "${FreeRTOS_SOURCE_DIR}/timers.c")
         target_link_libraries(${FreeRTOS_NAMESPACE}::Timers INTERFACE FreeRTOS)
@@ -138,9 +144,11 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
                 "portable/GCC/${PORT}"
                 "portable/GCC/${PORT}/r0p1"
                 "portable/GCC/${PORT}/non_secure"
+                "portable/GCC/${PORT}/secure"
                 "Source/portable/GCC/${PORT}"
                 "Source/portable/GCC/${PORT}/r0p1"
                 "Source/portable/GCC/${PORT}/non_secure"
+                "Source/portable/GCC/${PORT}/secure"
             NO_DEFAULT_PATH
         )
 
@@ -207,7 +215,7 @@ else()
         string(TOLOWER ${COMP} COMP_L)
         string(TOUPPER ${COMP} COMP)
         
-        string(REGEX MATCH "^STM32([CFGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
+        string(REGEX MATCH "^STM32([CFGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M33|M4|M7)?.*$" COMP ${COMP})
         
         if((NOT CMAKE_MATCH_1) AND (NOT CMAKE_MATCH_2))
             message(FATAL_ERROR "Unknown FreeRTOS component: ${COMP}")
